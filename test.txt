@@ -1,30 +1,63 @@
-.swiper-slider-visible {
-    transition-duration:0ms;
-    transform: translate3d(0px,0px,-0.0566893px) rotateX(0deg) rotateY(-0.005666893deg) scale(1);
-    z-index = 1;
+Cards.js
+
+import React, { useState } from "react";
+import "./Cards.css"; // Import your CSS file for styling
+
+function Cards() {
+  const [hoveredCard, setHoveredCard] = useState(null);
+
+  const handleMouseOver = (id) => {
+    setHoveredCard(id);
+  };
+
+  const handleMouseOut = () => {
+    setHoveredCard(null);
+  };
+
+  return (
+    <div className="main-container">
+      <div className="cards-container">
+        {[1, 2, 3, 4, 5, 6].map((id) => (
+          <div
+            key={id}
+            className={`card ${hoveredCard === id ? "hovered" : ""}`}
+            onMouseEnter={() => handleMouseOver(id)}
+            onMouseLeave={handleMouseOut}
+          >
+            {/* Card content here */}
+            <h2>Card {id}</h2>
+            {/* Add more card content as needed */}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
-.swiper-slide-shadow-left {
-opacity:0;
-transition-duration:0ms;
-}
-
-.swiper-slide-shadow-right {
-opacity: 0.000566893;
-transition-duration: 0ms
-}
+export default Cards;
 
 
-.swiper-slide-shadow-left {
-opacity:0;
-transition-duration:0ms;
-transform: translate3d(0px,0px,-199.887px) rotateX(0deg) rotateY(-19.9887deg) scale(1);
-    z-index = -1;
+cards.css
+
+.cards-container{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 50%;
 }
 
-.swiper-slide-shadow-right {
-opacity: 0.000566893;
-transition-duration: 0ms;
-transform: translate3d(0px,0px,-299.943px) rotateX(0deg) rotateY(-29.9943deg) scale(1);
-z-index = -2;
-}
+.card {
+    width: 200px;
+    height: 200px;
+    margin: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+    transition: width 0.2s ease-in-out, height 0.2s ease-in-out, margin 0.2s ease-in-out; /* Include height in transition */
+  }
+  
+  .card:hover {
+    width: 400px;
+    height: 400px; /* Double both width and height */
+    margin: 5px; /* Reduce horizontal and vertical margins for spacing */
+  }
+  
