@@ -60,4 +60,55 @@ cards.css
     height: 400px; /* Double both width and height */
     margin: 5px; /* Reduce horizontal and vertical margins for spacing */
   }
-  
+
+
+__________________________________
+
+import React, { useState } from 'react';
+import './Carousel.css'; // Import your custom CSS file for styling
+
+const Carousel = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const cardData = [
+    { id: 1, content: 'Card 1' },
+    { id: 2, content: 'Card 2' },
+    { id: 3, content: 'Card 3' },
+    { id: 4, content: 'Card 4' },
+    { id: 5, content: 'Card 5' },
+  ];
+
+  const nextSlide = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % cardData.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? cardData.length - 1 : prevIndex - 1
+    );
+  };
+
+  return (
+    <div className="carousel">
+      <button onClick={prevSlide} className="arrow left-arrow">
+        &lt;
+      </button>
+      <div className="card-container">
+        {cardData.map((card, index) => (
+          <div
+            key={card.id}
+            className={`card ${index === currentIndex ? 'active' : ''}`}
+          >
+            <h3>{card.content}</h3>
+          </div>
+        ))}
+      </div>
+      <button onClick={nextSlide} className="arrow right-arrow">
+        &gt;
+      </button>
+    </div>
+  );
+};
+
+export default Carousel;
+
