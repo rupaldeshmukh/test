@@ -166,3 +166,65 @@ const Carousel = () => {
 export default Carousel;
 
 
+________________________________________________
+
+import React, { useState } from 'react';
+import './Carousel.css';
+
+const Carousel = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const cardData = [
+    { id: 1, content: 'Card 1' },
+    { id: 2, content: 'Card 2' },
+    { id: 3, content: 'Card 3' },
+    { id: 4, content: 'Card 4' },
+    { id: 5, content: 'Card 5' },
+  ];
+
+  const nextSlide = () => {
+    const nextIndex = (currentIndex + 1) % cardData.length;
+    setCurrentIndex(nextIndex);
+  };
+
+  const prevSlide = () => {
+    const prevIndex = currentIndex === 0 ? cardData.length - 1 : currentIndex - 1;
+    setCurrentIndex(prevIndex);
+  };
+
+  const calculateTransformValue = () => {
+    const centerIndex = Math.floor(cardData.length / 5);
+    const offset = centerIndex - currentIndex;
+    return `translateX(${offset * 25}%)`; // Assuming each card takes up 25%
+  };
+
+  return (
+    <div className="carousel">
+      <button onClick={prevSlide} className="arrow left-arrow">
+        &lt;
+      </button>
+      <div
+        className="card-container"
+        style={{ transform: calculateTransformValue() }}
+      >
+        {cardData.map((card, index) => (
+          <div
+            key={card.id}
+            className={`card ${index === currentIndex ? 'active' : ''}`}
+            onClick={() => setCurrentIndex(index)}
+          >
+            <h3>{card.content}</h3>
+          </div>
+        ))}
+      </div>
+      <button onClick={nextSlide} className="arrow right-arrow">
+        &gt;
+      </button>
+    </div>
+  );
+};
+
+export default Carousel;
+
+
+
