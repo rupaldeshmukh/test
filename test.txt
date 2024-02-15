@@ -1,72 +1,80 @@
-import React, { useEffect, useRef } from 'react';
-import * as d3 from 'd3';
+import React, { useState } from 'react';
 
-const App = () => {
-  const svgRef = useRef(null);
+const products = [
+  { id: 1, name: 'Product 1', certified: 'silver' },
+  { id: 2, name: 'Product 2', certified: 'gold' },
+  { id: 3, name: 'Product 3', certified: 'silver' },
+  { id: 4, name: 'Product 4', certified: 'silver certified' },
+  // ... more products
+];
 
-  useEffect(() => {
-    const data = [
-      { type: 'parent', name: 'Parent 1' },
-      { type: 'parent', name: 'Parent 2' },
-      { type: 'parent', name: 'Parent 3' },
-      { type: 'parent', name: 'Parent 4' },
-      { type: 'parent', name: 'Parent 5' },
-      { type: 'middleware', name: 'Middleware' },
-      { type: 'child', name: 'Child 1' },
-      { type: 'child', name: 'Child 2' },
-      { type: 'child', name: 'Child 3' },
-      { type: 'child', name: 'Child 4' },
-      { type: 'child', name: 'Child 5' },
-    ];
+function App() {
+  const [selectedFilters, setSelectedFilters] = useState([]);
 
-    const margin = { top: 20, right: 80, bottom: 10, left: 10 };
-    const width = 600;
-    const height = 500;
+  const handleCheckboxChange = (event) => {
+    const isChecked = event.target.checked;
+    const value = event.target.value;
 
-    const svg = d3.select(svgRef.current)
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
-      .append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`);
+    if (isChecked) {
+      setSelectedFilters([...selectedFilters, value]);
+    } else {
+      setSelectedFilters(selectedFilters.filter((filter) => filter !== value));
+    }
+  };
 
-    const xScale = d3.scaleLinear()
-      .domain([0, 2])
-      .range([0, width]);
+  const filteredProducts = products.filter((product) => {
+    if (selectedFilters.length === 0) {
+      return true; // Show all products if no filters selected
+    }
 
-    const yScale = d3.scaleBand()
-      .domain(data.map(d => d.name))
-      .range([0, height])
-      .padding(0.1);
-
-    svg.selectAll('.node')
-      .data(data)
-      .enter().append('rect')
-      .attr('class', 'node')
-      .attr('x', (d) => xScale(d.type === 'middleware' ? 1 : (d.type === 'child' ? 2 : 0)))
-      .attr('y', (d) => yScale(d.name))
-      .attr('width', width / 3)
-      .attr('height', yScale.bandwidth())
-      .attr('fill', (d) => {
-        if (d.type === 'parent') return 'red';
-        else if (d.type === 'middleware') return 'blue';
-        else return 'green';
-      });
-
-    svg.selectAll('text')
-      .data(data)
-      .enter()
-      .append('text')
-      .attr('x', (d) => xScale(d.type === 'middleware' ? 1 : (d.type === 'child' ? 2 : 0)) + width / 6)
-      .attr('y', (d) => yScale(d.name) + yScale.bandwidth() / 2)
-      .attr('dy', '0.35em')
-      .attr('text-anchor', 'middle')
-      .text(d => d.name);
-
-  }, []);
+    return selectedFilters.some((filter) => {
+      if (filter === 'silver certified') {
+        return product.certified === 'silver'; // Handle special "silver certified" case
+      } else {
+        return product.certified.toLowerCase() === filter.toLowerCase(); // Case-insensitive filter comparison
+      }
+    });
+  });
 
   return (
-    <svg ref={svgRef}></svg>
+    <div>
+      <h1>Filter Products</h1>
+      <div>
+        <label>
+          <input
+            type="checkbox"
+            value="silver"
+            checked={selectedFilters.includes('silver')}
+            onChange={handleCheckboxChange}
+          />
+          Silver
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="gold"
+            checked={selectedFilters.includes('gold')}
+            onChange={handleCheckboxChange}
+          />
+          Gold
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="silver certified"
+            checked={selectedFilters.includes('silver certified')}
+            onChange={handleCheckboxChange}
+          />
+          Silver Certified
+        </label>
+      </div>
+      <ul>
+        {filteredProducts.map((product) => (
+          <li key={product.id}>{product.name}</li>
+        ))}
+      </ul>
+    </div>
   );
-};
+}
 
 export default App;
