@@ -1,80 +1,31 @@
-import React, { useState } from 'react';
+function modifyString(text) {
+  // Split the string into words using a space as the delimiter.
+  const words = text.split(" ");
 
-const products = [
-  { id: 1, name: 'Product 1', certified: 'silver' },
-  { id: 2, name: 'Product 2', certified: 'gold' },
-  { id: 3, name: 'Product 3', certified: 'silver' },
-  { id: 4, name: 'Product 4', certified: 'silver certified' },
-  // ... more products
-];
+  // Initialize an empty array to store the modified words.
+  const modifiedWords = [];
 
-function App() {
-  const [selectedFilters, setSelectedFilters] = useState([]);
+  // Iterate through each word in the original string.
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
 
-  const handleCheckboxChange = (event) => {
-    const isChecked = event.target.checked;
-    const value = event.target.value;
-
-    if (isChecked) {
-      setSelectedFilters([...selectedFilters, value]);
-    } else {
-      setSelectedFilters(selectedFilters.filter((filter) => filter !== value));
-    }
-  };
-
-  const filteredProducts = products.filter((product) => {
-    if (selectedFilters.length === 0) {
-      return true; // Show all products if no filters selected
+    // Add "and domain is finance" before the current "or" if not last word.
+    if (word === "or" && i < words.length - 1) {
+      modifiedWords.push("and domain is finance");
     }
 
-    return selectedFilters.some((filter) => {
-      if (filter === 'silver certified') {
-        return product.certified === 'silver'; // Handle special "silver certified" case
-      } else {
-        return product.certified.toLowerCase() === filter.toLowerCase(); // Case-insensitive filter comparison
-      }
-    });
-  });
+    // Add the current word to the modified words array.
+    modifiedWords.push(word);
+  }
 
-  return (
-    <div>
-      <h1>Filter Products</h1>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            value="silver"
-            checked={selectedFilters.includes('silver')}
-            onChange={handleCheckboxChange}
-          />
-          Silver
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="gold"
-            checked={selectedFilters.includes('gold')}
-            onChange={handleCheckboxChange}
-          />
-          Gold
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="silver certified"
-            checked={selectedFilters.includes('silver certified')}
-            onChange={handleCheckboxChange}
-          />
-          Silver Certified
-        </label>
-      </div>
-      <ul>
-        {filteredProducts.map((product) => (
-          <li key={product.id}>{product.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
+  // Add "and domain is finance" at the end of the string.
+  modifiedWords.push("and domain is finance");
+
+  // Join the modified words back into a string with spaces in between.
+  return modifiedWords.join(" ");
 }
 
-export default App;
+// Example usage
+const text = "This string contains the word or multiple times.";
+const modifiedText = modifyString(text);
+console.log(modifiedText); // Output: This string contains the word and domain is finance or multiple times and domain is finance.
