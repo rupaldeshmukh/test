@@ -1,31 +1,52 @@
-function modifyString(text) {
-  // Split the string into words using a space as the delimiter.
-  const words = text.split(" ");
+import React, { useState, useEffect } from 'react';
+import './App.css'; // Import your CSS file
 
-  // Initialize an empty array to store the modified words.
-  const modifiedWords = [];
+function App() {
+  // State to track scroll position
+  const [scrollPosition, setScrollPosition] = useState(0);
 
-  // Iterate through each word in the original string.
-  for (let i = 0; i < words.length; i++) {
-    const word = words[i];
+  // Effect to update scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const position = window.pageYOffset;
+      setScrollPosition(position);
+    };
 
-    // Add "and domain is finance" before the current "or" if not last word.
-    if (word === "or" && i < words.length - 1) {
-      modifiedWords.push("and domain is finance");
-    }
+    // Add event listener for scroll
+    window.addEventListener('scroll', handleScroll);
 
-    // Add the current word to the modified words array.
-    modifiedWords.push(word);
-  }
+    // Clean up
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []); // Run only on component mount and unmount
 
-  // Add "and domain is finance" at the end of the string.
-  modifiedWords.push("and domain is finance");
+  // Define styles for the header based on scroll position
+  const headerStyles = {
+    backgroundColor: scrollPosition > 100 ? 'black' : 'transparent',
+    transition: 'background-color 0.3s ease',
+    padding: '20px',
+    color: 'white',
+    width: '100%',
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    zIndex: 1000,
+  };
 
-  // Join the modified words back into a string with spaces in between.
-  return modifiedWords.join(" ");
+  return (
+    <div className="App">
+      {/* Header with dynamic styles */}
+      <header style={headerStyles}>
+        Header
+      </header>
+
+      {/* Main content */}
+      <div style={{ height: '2000px', paddingTop: '100px' }}>
+        Scroll down to see the header color change
+      </div>
+    </div>
+  );
 }
 
-// Example usage
-const text = "This string contains the word or multiple times.";
-const modifiedText = modifyString(text);
-console.log(modifiedText); // Output: This string contains the word and domain is finance or multiple times and domain is finance.
+export default App;
