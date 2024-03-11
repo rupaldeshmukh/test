@@ -1,52 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import './App.css'; // Import your CSS file
+<div class="header">
+  <div class="nav">
+    <ul id="navigationList">
+      <li>customer</li>
+      <li>consumer</li>
+      <li>producer</li>
+    </ul>
+  </div>
+  <section class="data"> test</section>
+  <section class="data-r"> test1</section>
+  <section class="data-p"> test2</section>
+</div>
 
-function App() {
-  // State to track scroll position
-  const [scrollPosition, setScrollPosition] = useState(0);
+<script>
+  const navigationList = document.getElementById('navigationList');
+  const sections = document.querySelectorAll('section');
 
-  // Effect to update scroll position
-  useEffect(() => {
-    const handleScroll = () => {
-      const position = window.pageYOffset;
-      setScrollPosition(position);
-    };
+  navigationList.addEventListener('mouseover', () => {
+    sections.forEach(section => section.style.opacity = 0.5);
+  });
 
-    // Add event listener for scroll
-    window.addEventListener('scroll', handleScroll);
-
-    // Clean up
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []); // Run only on component mount and unmount
-
-  // Define styles for the header based on scroll position
-  const headerStyles = {
-    backgroundColor: scrollPosition > 100 ? 'black' : 'transparent',
-    transition: 'background-color 0.3s ease',
-    padding: '20px',
-    color: 'white',
-    width: '100%',
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    zIndex: 1000,
-  };
-
-  return (
-    <div className="App">
-      {/* Header with dynamic styles */}
-      <header style={headerStyles}>
-        Header
-      </header>
-
-      {/* Main content */}
-      <div style={{ height: '2000px', paddingTop: '100px' }}>
-        Scroll down to see the header color change
-      </div>
-    </div>
-  );
-}
-
-export default App;
+  navigationList.addEventListener('mouseout', () => {
+    sections.forEach(section => section.style.opacity = 1);
+  });
+</script>
