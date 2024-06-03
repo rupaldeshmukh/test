@@ -1,98 +1,64 @@
-import React, { useState } from 'react';
+apiService.js
 
-// ChildComponent
-const ChildComponent = ({ handleRadioChange }) => {
-  const [formData, setFormData] = useState({
-    qDataPolicyComplyReq: '',
-    qImpactTMobBusNservice: '',
-    qProdinLOBorFunc: '',
-    qExecDecision: '',
-    qCustFacing: '',
-    qLegalPeril: '',
-  });
+import axios from 'axios';
 
-  const handleOptionChange = (name, value) => {
-    setFormData({ ...formData, [name]: value });
-    handleRadioChange(name, value);
-  };
+export const callTestApi = async (username, token) => {
+    try {
+        const response = await axios.get('https://yourapi.com/test', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            params: {
+                username: username
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error calling test API:', error);
+        throw error;
+    }
+};
+__________________
+App.js
+import React, { useEffect } from 'react';
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
+import { login, getToken } from './authService';
+import { callTestApi } from './apiService';
 
-  return (
-    <div>
-      <h3>Child Component</h3>
-      <div>
-        <h4>Is this product used to support any T-Mobile data policy compliance requirements (e.g., SOX key report)?</h4>
-        <label>
-          <input
-            type="radio"
-            value="yes"
-            checked={formData.qDataPolicyComplyReq === 'yes'}
-            onChange={() => handleOptionChange('qDataPolicyComplyReq', 'yes')}
-          />
-          Yes
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="no"
-            checked={formData.qDataPolicyComplyReq === 'no'}
-            onChange={() => handleOptionChange('qDataPolicyComplyReq', 'no')}
-          />
-          No
-        </label>
-      </div>
-      <div>
-        <h4>If this product was down, would it cause major issues to T-Mobile's ability to conduct business & provide services?</h4>
-        <label>
-          <input
-            type="radio"
-            value="yes"
-            checked={formData.qImpactTMobBusNservice === 'yes'}
-            onChange={() => handleOptionChange('qImpactTMobBusNservice', 'yes')}
-          />
-          Yes
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="no"
-            checked={formData.qImpactTMobBusNservice === 'no'}
-            onChange={() => handleOptionChange('qImpactTMobBusNservice', 'no')}
-          />
-          No
-        </label>
-      </div>
-      {/* Repeat similar structure for other questions */}
-    </div>
-  );
+const App = () => {
+    const { instance, accounts } = useMsal();
+    const isAuthenticated = useIsAuthenticated();
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            login();
+        }
+    }, [isAuthenticated]);
+
+    useEffect(() => {
+        const fetchApiData = async () => {
+            if (isAuthenticated && accounts.length > 0) {
+                const username = accounts[0].username;
+                try {
+                    const token = await getToken(accounts[0]);
+                    const data = await callTestApi(username, token);
+                    console.log(data);
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        };
+
+        fetchApiData();
+    }, [isAuthenticated, accounts]);
+
+    return (
+        <div>
+            <h1>React MSAL Example</h1>
+            {isAuthenticated ? <p>Welcome, {accounts[0].username}!</p> : <p>Logging in...</p>}
+        </div>
+    );
 };
 
-// ParentComponent
-const ParentComponent = () => {
-  const [formData, setFormData] = useState({
-    qDataPolicyComplyReq: '',
-    qImpactTMobBusNservice: '',
-    qProdinLOBorFunc: '',
-    qExecDecision: '',
-    qCustFacing: '',
-    qLegalPeril: '',
-  });
-
-  const handleRadioChange = (name, value) => {
-    setFormData({ ...formData, [name]: value });
-  };
-
-  return (
-    <div>
-      <h2>Parent Component</h2>
-      <ChildComponent handleRadioChange={handleRadioChange} />
-      <div>
-        <h3>Form Data in Parent Component:</h3>
-        <p>Is this product used to support any T-Mobile data policy compliance requirements: {formData.qDataPolicyComplyReq}</p>
-        <p>If this product was down, would it cause major issues to T-Mobile's ability to conduct business & provide services: {formData.qImpactTMobBusNservice}</p>
-        {/* Repeat similar structure for other questions */}
-      </div>
-    </div>
-  );
-};
-
-export default ParentComponent;
+export default App;
