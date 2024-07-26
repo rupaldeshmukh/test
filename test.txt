@@ -1,64 +1,19 @@
-apiService.js
+const axios = require('axios');
 
-import axios from 'axios';
-
-export const callTestApi = async (username, token) => {
-    try {
-        const response = await axios.get('https://yourapi.com/test', {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            params: {
-                username: username
-            }
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error calling test API:', error);
-        throw error;
+axios.get('https://api.example.com/data')
+  .then(response => {
+    console.log('Response Data:', response.data); // Print the response data to the console
+  })
+  .catch(error => {
+    if (error.response) {
+      // The request was made and the server responded with a status code that falls out of the range of 2xx
+      console.error('Error Status:', error.response.status); // Print the status code
+      console.error('Error Message:', error.response.data.message || 'Unknown error'); // Print the custom error message
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('No response received:', error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Error:', error.message);
     }
-};
-__________________
-App.js
-import React, { useEffect } from 'react';
-import { useMsal, useIsAuthenticated } from "@azure/msal-react";
-import { login, getToken } from './authService';
-import { callTestApi } from './apiService';
-
-const App = () => {
-    const { instance, accounts } = useMsal();
-    const isAuthenticated = useIsAuthenticated();
-
-    useEffect(() => {
-        if (!isAuthenticated) {
-            login();
-        }
-    }, [isAuthenticated]);
-
-    useEffect(() => {
-        const fetchApiData = async () => {
-            if (isAuthenticated && accounts.length > 0) {
-                const username = accounts[0].username;
-                try {
-                    const token = await getToken(accounts[0]);
-                    const data = await callTestApi(username, token);
-                    console.log(data);
-                } catch (error) {
-                    console.error('Error:', error);
-                }
-            }
-        };
-
-        fetchApiData();
-    }, [isAuthenticated, accounts]);
-
-    return (
-        <div>
-            <h1>React MSAL Example</h1>
-            {isAuthenticated ? <p>Welcome, {accounts[0].username}!</p> : <p>Logging in...</p>}
-        </div>
-    );
-};
-
-export default App;
+  });
