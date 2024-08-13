@@ -1,19 +1,35 @@
-const axios = require('axios');
+const handleMove = (direction, carouselId) => {
+    setCarouselData(prevState => {
+        const carousel = prevState[carouselId];
+        const newIndex = (carousel.currentIndex + (direction === "prev" ? 1 : -1) + carousel.items.length) % carousel.items.length;
+        
+        return {
+            ...prevState,
+            [carouselId]: {
+                ...carousel,
+                items: [...carousel.items.slice(newIndex), ...carousel.items.slice(0, newIndex)],
+                currentIndex: newIndex,
+            }
+        };
+    });
+};
 
-axios.get('https://api.example.com/data')
-  .then(response => {
-    console.log('Response Data:', response.data); // Print the response data to the console
-  })
-  .catch(error => {
-    if (error.response) {
-      // The request was made and the server responded with a status code that falls out of the range of 2xx
-      console.error('Error Status:', error.response.status); // Print the status code
-      console.error('Error Message:', error.response.data.message || 'Unknown error'); // Print the custom error message
-    } else if (error.request) {
-      // The request was made but no response was received
-      console.error('No response received:', error.request);
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error('Error:', error.message);
-    }
-  });
+
+____
+
+const [carouselData, setCarouselData] = useState({
+    carousel1: {
+        items: [/* your items here */],
+        currentIndex: 0,
+    },
+    carousel2: {
+        items: [/* your items here */],
+        currentIndex: 0,
+    },
+    // Add more carousels as needed
+});
+
+___
+
+handleMove("prev", "carousel1"); // Move carousel1 to the previous item
+handleMove("next", "carousel2"); // Move carousel2 to the next item
