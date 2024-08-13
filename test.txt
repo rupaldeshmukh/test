@@ -1,7 +1,48 @@
+import React, { useState } from 'react';
+import MultiSelectDropdown from './Component/MultiSelectDropdown';
+
+function App() {
+  const [selectedGroups, setSelectedGroups] = useState([]);
+
+  const handleSelectionChange = (newSelection) => {
+    setSelectedGroups(newSelection);
+    // console.log("Selected groups:", newSelection);
+    // Here, you could make an API call to save the selected groups
+  };
+
+  const saveSelectedGroups = () => {
+    // Example API call to save the selected groups
+    // console.log("test selectedGroups",selectedGroups)
+  };
+
+  const options = [
+    'test ',
+    'P&T test ',
+    'TCM Team (Ptest ',
+    'T-test ',
+    'P&test ',
+    'test Web'
+    // Add more options as needed
+  ];
+
+  return (
+    <div className="App">
+      <h1>Select AAD Groups</h1>
+      <MultiSelectDropdown options={options} onSelectionChange={handleSelectionChange} />
+      <button onClick={saveSelectedGroups}>Save Groups</button>
+    </div>
+  );
+}
+
+export default App;
+
+??????????????????????????
+
+
 import React, { useState, useRef, useEffect } from 'react';
 import './MultiSelectDropdown.css';
 
-const MultiSelectDropdown = ({ options }) => {
+const MultiSelectDropdown = ({ options, onSelectionChange }) => {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -9,11 +50,12 @@ const MultiSelectDropdown = ({ options }) => {
 
   const handleCheckboxChange = (event) => {
     const value = event.target.value;
-    setSelectedOptions((prevSelected) =>
-      prevSelected.includes(value)
-        ? prevSelected.filter((option) => option !== value)
-        : [...prevSelected, value]
-    );
+    const newSelectedOptions = selectedOptions.includes(value)
+      ? selectedOptions.filter((option) => option !== value)
+      : [...selectedOptions, value];
+
+    setSelectedOptions(newSelectedOptions);
+    onSelectionChange(newSelectedOptions);  // Pass the updated selection to the parent
   };
 
   const toggleDropdown = () => {
@@ -83,9 +125,8 @@ const MultiSelectDropdown = ({ options }) => {
 };
 
 export default MultiSelectDropdown;
-_______________________
-CSS
-__________________________
+
+??????????????????????
 .multi-select-dropdown {
     width: 300px;
     position: relative;
@@ -162,21 +203,4 @@ __________________________
     cursor: pointer;
     color: #888;
   }
-  ________________________________
-App,js
-import MultiSelectDropdown from './Component/MultiSelectDropdown';
-import "./App.css"
-
-const options = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
-
-const App = () => {
-  return (
-    <div>
-      <h1>Multi-Select Dropdown Example</h1>
-      <MultiSelectDropdown options={options} />
-    </div>
-  );
-};
-export default App;
-
-
+  
