@@ -203,4 +203,98 @@ export default MultiSelectDropdown;
     cursor: pointer;
     color: #888;
   }
+
+
+_++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+import React, { useState, useEffect } from 'react';
+
+const MultiSelectFilters = () => {
+    const data = {
+        "report": [
+            { "Domain": "Supportive", "subDomain": "AdressSupp1" },
+            { "Domain": "Supportive", "subDomain": "AdressSupp2" },
+            { "Domain": "Finance", "subDomain": "FinanceAdress1" },
+            { "Domain": "Finance", "subDomain": "FinanceAdress2" },
+            { "Domain": "Individual", "subDomain": "IndiAdress1" },
+            { "Domain": "Individual", "subDomain": "IndiAdress2" },
+            { "Domain": "Individual", "subDomain": "IndiAdress3" }
+        ]
+    };
+
+    const domainData = data.report.reduce((acc, { Domain, subDomain }) => {
+        if (!acc[Domain]) {
+            acc[Domain] = [];
+        }
+        acc[Domain].push(subDomain);
+        return acc;
+    }, {});
+
+    const [selectedDomains, setSelectedDomains] = useState([]);
+    const [subDomainOptions, setSubDomainOptions] = useState([]);
+    const [selectedSubDomains, setSelectedSubDomains] = useState([]);
+
+    useEffect(() => {
+        const filteredSubDomains = selectedDomains.flatMap(domain => domainData[domain]);
+        setSubDomainOptions(filteredSubDomains);
+    }, [selectedDomains]);
+
+    const handleDomainChange = (e) => {
+        const options = e.target.options;
+        const selected = [];
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].selected) {
+                selected.push(options[i].value);
+            }
+        }
+        setSelectedDomains(selected);
+    };
+
+    const handleSubDomainChange = (e) => {
+        const options = e.target.options;
+        const selected = [];
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].selected) {
+                selected.push(options[i].value);
+            }
+        }
+        setSelectedSubDomains(selected);
+    };
+
+    return (
+        <div>
+            <h2>Select Domain</h2>
+            <select multiple onChange={handleDomainChange}>
+                {Object.keys(domainData).map(domain => (
+                    <option key={domain} value={domain}>{domain}</option>
+                ))}
+            </select>
+
+            <h2>Select SubDomain</h2>
+            <select multiple onChange={handleSubDomainChange}>
+                {subDomainOptions.map(subDomain => (
+                    <option key={subDomain} value={subDomain}>{subDomain}</option>
+                ))}
+            </select>
+
+            <div>
+                <h3>Selected Domains:</h3>
+                <ul>
+                    {selectedDomains.map(domain => (
+                        <li key={domain}>{domain}</li>
+                    ))}
+                </ul>
+
+                <h3>Selected SubDomains:</h3>
+                <ul>
+                    {selectedSubDomains.map(subDomain => (
+                        <li key={subDomain}>{subDomain}</li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    );
+};
+
+export default MultiSelectFilters;
+
   
