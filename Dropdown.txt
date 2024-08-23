@@ -4,52 +4,79 @@ import './MultiSelectDropdown.css';
 import MultiSelectDropdown from './MultiSelectDropdown';
 
 const CombinedMultiSelectFilters = () => {
-    const data = {
-        "report": [
-            { "Domain": "Supportive", "subDomain": "AddressSupp1" },
-            { "Domain": "Supportive", "subDomain": "AddressSupp2" },
-            { "Domain": "Finance", "subDomain": "FinanceAddress1" },
-            { "Domain": "Finance", "subDomain": "FinanceAddress2" },
-            { "Domain": "Individual", "subDomain": "IndiAddress1" },
-            { "Domain": "Individual", "subDomain": "IndiAddress2" },
-            { "Domain": "Individual", "subDomain": "IndiAddress3" }
-        ]
-    };
-
-    const domainData = data.report.reduce((acc, { Domain, subDomain }) => {
-        if (!acc[Domain]) {
-            acc[Domain] = [];
-        }
-        acc[Domain].push(subDomain);
-        return acc;
-    }, {});
-
+    const [data, setData] = useState(null);
+    const [domainData, setDomainData] = useState({});
     const [selectedDomains, setSelectedDomains] = useState([]);
     const [subDomainOptions, setSubDomainOptions] = useState([]);
     const [selectedSubDomains, setSelectedSubDomains] = useState([]);
     const [finalString, setFinalString] = useState('');
 
+    // Fetch data from the API
     useEffect(() => {
-        // Filter subdomains based on selected domains
-        const filteredSubDomains = selectedDomains.flatMap(domain => domainData[domain]);
-        setSubDomainOptions(filteredSubDomains);
+        const fetchData = async () => {
+            // Replace with your actual API call
+            const apiData = {
+                "report": [
+                    { "Domain": "Supportive", "subDomain": "AddressSupp1" },
+                    { "Domain": "Supportive", "subDomain": "AddressSupp2" },
+                    { "Domain": "Finance", "subDomain": "FinanceAddress1" },
+                    { "Domain": "Finance", "subDomain": "FinanceAddress2" },
+                    { "Domain": "Individual", "subDomain": "IndiAddress1" },
+                    { "Domain": "Individual", "subDomain": "IndiAddress2" },
+                    { "Domain": "Individual", "subDomain": "IndiAddress3" }
+                ]
+            };
 
-        // Remove subdomains that do not belong to selected domains
-        const newSelectedSubDomains = selectedSubDomains.filter(subDomain =>
-            filteredSubDomains.includes(subDomain)
-        );
-        setSelectedSubDomains(newSelectedSubDomains);
-    }, [selectedDomains]);
+            setData(apiData);
+        };
 
+        fetchData();
+    }, []);
+
+    // Process the data to extract domains and subdomains
     useEffect(() => {
-        // Generate the final string in the required format
-        const finalStringArray = selectedDomains.flatMap(domain => {
-            return selectedSubDomains
-                .filter(subDomain => domainData[domain].includes(subDomain))
-                .map(subDomain => `${domain}>${subDomain}`);
-        });
-        setFinalString(finalStringArray.join(' , '));
-    }, [selectedDomains, selectedSubDomains]);
+        if (data) {
+            const processedDomainData = data.report.reduce((acc, { Domain, subDomain }) => {
+                if (!acc[Domain]) {
+                    acc[Domain] = [];
+                }
+                acc[Domain].push(subDomain);
+                return acc;
+            }, {});
+
+            setDomainData(processedDomainData);
+        }
+    }, [data]);
+
+    // Update subDomainOptions and filter selected subdomains based on selected domains
+    useEffect(() => {
+        if (selectedDomains.length > 0 && domainData) {
+            const filteredSubDomains = selectedDomains.flatMap(domain => domainData[domain]);
+            setSubDomainOptions(filteredSubDomains);
+
+            const newSelectedSubDomains = selectedSubDomains.filter(subDomain =>
+                filteredSubDomains.includes(subDomain)
+            );
+            setSelectedSubDomains(newSelectedSubDomains);
+        } else {
+            setSubDomainOptions([]);
+            setSelectedSubDomains([]);
+        }
+    }, [selectedDomains, domainData]);
+
+    // Update the final string based on selected domains and subdomains
+    useEffect(() => {
+        if (selectedDomains.length > 0 && selectedSubDomains.length > 0) {
+            const finalStringArray = selectedDomains.flatMap(domain => {
+                return selectedSubDomains
+                    .filter(subDomain => domainData[domain]?.includes(subDomain))
+                    .map(subDomain => `${domain}>${subDomain}`);
+            });
+            setFinalString(finalStringArray.join(' , '));
+        } else {
+            setFinalString('');
+        }
+    }, [selectedDomains, selectedSubDomains, domainData]);
 
     const handleDomainSelectionChange = (newSelectedDomains) => {
         setSelectedDomains(newSelectedDomains);
@@ -62,18 +89,26 @@ const CombinedMultiSelectFilters = () => {
     return (
         <div>
             <h2>Select Domain</h2>
-            <MultiSelectDropdown
-                options={Object.keys(domainData)}
-                selectedOptions={selectedDomains}
-                onSelectionChange={handleDomainSelectionChange}
-            />
+            {Object.keys(domainData).length > 0 ? (
+                <MultiSelectDropdown
+                    options={Object.keys(domainData)}
+                    selectedOptions={selectedDomains}
+                    onSelectionChange={handleDomainSelectionChange}
+                />
+            ) : (
+                <p>Loading domains...</p>
+            )}
 
             <h2>Select SubDomain</h2>
-            <MultiSelectDropdown
-                options={subDomainOptions}
-                selectedOptions={selectedSubDomains}
-                onSelectionChange={handleSubDomainSelectionChange}
-            />
+            {subDomainOptions.length > 0 ? (
+                <MultiSelectDropdown
+                    options={subDomainOptions}
+                    selectedOptions={selectedSubDomains}
+                    onSelectionChange={handleSubDomainSelectionChange}
+                />
+            ) : (
+                <p>No subdomains available.</p>
+            )}
 
             <div>
                 <h3>Selected Domains:</h3>
