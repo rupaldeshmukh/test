@@ -1,0 +1,188 @@
+Combined file___
+import React, { useState, useEffect } from 'react';
+import './MultiSelectDropdown.css';
+import MultiSelectDropdown from './MultiSelectDropdown';
+
+const CombinedMultiSelectFilters = () => {
+    const data = {
+        "report": [
+            { "Domain": "Supportive", "subDomain": "AddressSupp1" },
+            { "Domain": "Supportive", "subDomain": "AddressSupp2" },
+            { "Domain": "Finance", "subDomain": "FinanceAddress1" },
+            { "Domain": "Finance", "subDomain": "FinanceAddress2" },
+            { "Domain": "Individual", "subDomain": "IndiAddress1" },
+            { "Domain": "Individual", "subDomain": "IndiAddress2" },
+            { "Domain": "Individual", "subDomain": "IndiAddress3" }
+        ]
+    };
+
+    const domainData = data.report.reduce((acc, { Domain, subDomain }) => {
+        if (!acc[Domain]) {
+            acc[Domain] = [];
+        }
+        acc[Domain].push(subDomain);
+        return acc;
+    }, {});
+
+    const [selectedDomains, setSelectedDomains] = useState([]);
+    const [subDomainOptions, setSubDomainOptions] = useState([]);
+    const [selectedSubDomains, setSelectedSubDomains] = useState([]);
+    const [finalString, setFinalString] = useState('');
+
+    useEffect(() => {
+        // Filter subdomains based on selected domains
+        const filteredSubDomains = selectedDomains.flatMap(domain => domainData[domain]);
+        setSubDomainOptions(filteredSubDomains);
+
+        // Remove subdomains that do not belong to selected domains
+        const newSelectedSubDomains = selectedSubDomains.filter(subDomain =>
+            filteredSubDomains.includes(subDomain)
+        );
+        setSelectedSubDomains(newSelectedSubDomains);
+    }, [selectedDomains]);
+
+    useEffect(() => {
+        // Generate the final string in the required format
+        const finalStringArray = selectedDomains.flatMap(domain => {
+            return selectedSubDomains
+                .filter(subDomain => domainData[domain].includes(subDomain))
+                .map(subDomain => `${domain}>${subDomain}`);
+        });
+        setFinalString(finalStringArray.join(' , '));
+    }, [selectedDomains, selectedSubDomains]);
+
+    const handleDomainSelectionChange = (newSelectedDomains) => {
+        setSelectedDomains(newSelectedDomains);
+    };
+
+    const handleSubDomainSelectionChange = (newSelectedSubDomains) => {
+        setSelectedSubDomains(newSelectedSubDomains);
+    };
+
+    return (
+        <div>
+            <h2>Select Domain</h2>
+            <MultiSelectDropdown
+                options={Object.keys(domainData)}
+                selectedOptions={selectedDomains}
+                onSelectionChange={handleDomainSelectionChange}
+            />
+
+            <h2>Select SubDomain</h2>
+            <MultiSelectDropdown
+                options={subDomainOptions}
+                selectedOptions={selectedSubDomains}
+                onSelectionChange={handleSubDomainSelectionChange}
+            />
+
+            <div>
+                <h3>Selected Domains:</h3>
+                <ul>
+                    {selectedDomains.map(domain => (
+                        <li key={domain}>{domain}</li>
+                    ))}
+                </ul>
+
+                <h3>Selected SubDomains:</h3>
+                <ul>
+                    {selectedSubDomains.map(subDomain => (
+                        <li key={subDomain}>{subDomain}</li>
+                    ))}
+                </ul>
+
+                <h3>Final String:</h3>
+                <p>{finalString}</p>
+            </div>
+        </div>
+    );
+};
+
+export default CombinedMultiSelectFilters;
+
+______________import React, { useState, useRef, useEffect } from 'react';
+import './MultiSelectDropdown.css';
+
+const MultiSelectDropdown = ({ options, selectedOptions, onSelectionChange }) => {
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef(null);
+
+  const handleCheckboxChange = (event) => {
+    const value = event.target.value;
+    const newSelectedOptions = selectedOptions.includes(value)
+      ? selectedOptions.filter((option) => option !== value)
+      : [...selectedOptions, value];
+
+    onSelectionChange(newSelectedOptions);
+    setSearchTerm(''); // Reset search term after selection
+  };
+
+  const toggleDropdown = () => {
+    setDropdownVisible(!dropdownVisible);
+  };
+
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setDropdownVisible(false);
+    }
+  };
+
+  const handleInputChange = (event) => {
+    setSearchTerm(event.target.value);
+    setDropdownVisible(true);
+  };
+
+  const filteredOptions = options.filter(option =>
+    option.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div className="multi-select-dropdown" ref={dropdownRef}>
+      <div className="dropdown-input" onClick={toggleDropdown}>
+        <input
+          type="text"
+          placeholder="Search and select"
+          value={searchTerm}
+          onChange={handleInputChange}
+        />
+      </div>
+      {dropdownVisible && (
+        <div className="dropdown-content">
+          {filteredOptions.length > 0 ? (
+            filteredOptions.map((option) => (
+              <label key={option} className="dropdown-option">
+                <input
+                  type="checkbox"
+                  value={option}
+                  checked={selectedOptions.includes(option)}
+                  onChange={handleCheckboxChange}
+                />
+                {option}
+              </label>
+            ))
+          ) : (
+            <div className="no-options">No matching options</div>
+          )}
+        </div>
+      )}
+      <div className="selected-options">
+        {selectedOptions.map((option) => (
+          <span key={option} className="selected-option">
+            {option} 
+            <button onClick={() => handleCheckboxChange({ target: { value: option } })}>×</button>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default MultiSelectDropdown;
+_
